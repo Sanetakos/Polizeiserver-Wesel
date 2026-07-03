@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ermittlungs-Interface: Museums Mysterien</title>
+    <style>
+        :root {
+            --bg-body: #12171f;
+            --bg-container: #1b222c;
+            --text-primary: #e0e6ed;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-success: #22c55e;
+            --accent-error: #ef4444;
+            --border-color: #334155;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            line-height: 1.6;
+        }
+
+        .interface-wrapper {
+            background-color: var(--bg-container);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-width: 850px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #0f172a;
+            padding: 20px 30px;
+            border-bottom: 2px solid var(--accent-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; color: var(--text-primary); }
+
+        #phase-title {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            color: var(--accent-error);
+            border: 1px solid var(--accent-error);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-reset:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        #timer-display {
+            font-family: "Courier New", monospace;
+            font-size: 1.8rem;
+            color: var(--accent-error);
+            font-weight: bold;
+            background: #000;
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-error);
+        }
+
+        .content-body { padding: 40px; }
+
+        .form-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--accent-blue);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+        }
+
+        .question-row { margin-bottom: 25px; }
+
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+
+        input[type="text"] {
+            background-color: #0f172a;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"].correct-field {
+            border-color: var(--accent-success) !important;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+
+        input[type="text"].error-field {
+            border-color: var(--accent-error) !important;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .feedback-msg {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .feedback-msg.suspect-response {
+            text-align: left;
+            font-style: italic;
+            border-left: 4px solid var(--accent-error);
+        }
+
+        .choice-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .choice-item {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .choice-item:hover { border-color: var(--accent-blue); }
+        .choice-item input { margin-right: 15px; transform: scale(1.5); }
+
+        .btn-validate {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        #phase2, #phase3, #victory-screen { display: none; }
+
+        .victory-content { text-align: center; }
+
+        .victory-img {
+            max-width: 100%;
+            height: auto;
+            border: 4px solid var(--accent-success);
+            border-radius: 8px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .story-text {
+            text-align: left;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-success);
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .score-big { font-size: 3rem; font-family: "Courier New", monospace; color: var(--accent-success); }
+        .penalty-text { color: var(--accent-error); font-size: 1.1rem; font-weight: bold; }
+
+        .highscore-section {
+            margin-top: 40px;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .highscore-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .highscore-table th, .highscore-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .highscore-table th { color: var(--accent-blue); }
+
+        /* Neue Hint Styles */
+        .hint-controls {
+            margin-top: 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-hint {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+
+        .btn-hint:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .btn-solution {
+            color: var(--accent-error);
+            border-color: var(--accent-error);
+        }
+
+        .btn-solution:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .hint-display {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 8px 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--accent-blue);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="interface-wrapper">
+    <header>
+        <div>
+            <h1>Polizeiserver Wesel</h1>
+            <div id="phase-title">Phase 1: Alibi-Check</div>
+        </div>
+        <div class="header-controls">
+            <button onclick="resetSystem()" class="btn-reset">System Reset</button>
+            <div id="timer-display">45:00</div>
+        </div>
+    </header>
+
+    <main class="content-body">
+        
+        <div id="phase1">
+            <div class="form-info">Geben Sie die ermittelten Fakten ein. Falsche Angaben werden rot markiert.</div>
+            <form onsubmit="event.preventDefault(); validatePhase1();">
+                <div class="question-row">
+                    <label>01. Was hat Dr. Elisabeth Ingram laut ihrer Aussage zur Tatzeit gemacht?</label>
+                    <input type="text" id="ans1">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 0, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 0, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 0, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-0" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>02. Was ist das Alibi von Peter Gernot?</label>
+                    <input type="text" id="ans2">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 1, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 1, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 1, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-1" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>03. Klaus Badelt präsentiert einen Hinweis. Was übergibt er?</label>
+                    <input type="text" id="ans3">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 2, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 2, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 2, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-2" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>04. Auf wessen Geburtstag war Lena Schiffer zur Tatzeit?</label>
+                    <input type="text" id="ans4">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 3, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 3, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 3, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-3" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>05. Wo befand sich Catherine Sernault zum Zeitpunkt des Diebstahls?</label>
+                    <input type="text" id="ans5">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 4, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 4, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 4, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-4" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>06. Welchen Film besuchte Sabrina Völker angeblich?</label>
+                    <input type="text" id="ans6">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 5, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 5, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 5, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-5" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>07. Wo war Viktor Ernest zum Zeitpunkt des Diebstahls?</label>
+                    <input type="text" id="ans7">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 6, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 6, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 6, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-6" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>08. Wo ist Theodor Muno angeblich gewesen?</label>
+                    <input type="text" id="ans8">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 7, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p1', 7, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p1', 7, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p1-7" class="hint-display"></div>
+                </div>
+                <button type="submit" class="btn-validate">Phase 1 abschließen</button>
+            </form>
+            <div id="p1-feedback" class="feedback-msg"></div>
+        </div>
+
+        <div id="phase2">
+            <div class="form-info"><strong>PHASE 2 FREIGESCHALTET.</strong> Nachdem ihr euch mit den Aussagen der Verdächtigen und den ersten Indizien beschäftigt habt, sind euch einige Ungereimtheiten aufgefallen. Ihr beschließt die Verdächtigen zu konfrontieren und begebt euch wieder an die Ermittlungen.<br><br>Inzwischen sind auch weitere Hinweise von Kommissar Henkel angekommen (Ihr dürft nun den Umschlag Nr. 2 öffnen).</div>
+            <form onsubmit="event.preventDefault(); validatePhase2();">
+                <div class="question-row">
+                    <label>01. Wer erpresst Viktor Ernest?</label>
+                    <input type="text" id="p2_ans1">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 0, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 0, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 0, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-0" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>02. In welche Machenschaften war Theodor Muno verstrickt?</label>
+                    <input type="text" id="p2_ans2">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 1, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 1, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 1, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-1" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>03. Was ist Dr. Ingrams großes Problem?</label>
+                    <input type="text" id="p2_ans3">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 2, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 2, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 2, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-2" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>04. Was ist mit den Geldern für die Ausstellung von Sabrina Völker passiert?</label>
+                    <input type="text" id="p2_ans4">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 3, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 3, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 3, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-3" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>05. Wer verbirgt sich hinter den Pseudonymen Löwe und Adler?</label>
+                    <input type="text" id="p2_ans5">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 4, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 4, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 4, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-4" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>06. Wer versucht Dr. Ingram zu erpressen?</label>
+                    <input type="text" id="p2_ans6">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 5, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 5, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 5, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-5" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>07. Welche Person möchte sich auf eine Kreuzfahrt begeben?</label>
+                    <input type="text" id="p2_ans7">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 6, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 6, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 6, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-6" class="hint-display"></div>
+                </div>
+                <div class="question-row">
+                    <label>08. Wer lügt über seine familiären Verbindungen?</label>
+                    <input type="text" id="p2_ans8">
+                    <div class="hint-controls">
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 7, 1)">Tipp 1</button>
+                        <button type="button" class="btn-hint" onclick="showHint('p2', 7, 2)">Tipp 2</button>
+                        <button type="button" class="btn-hint btn-solution" onclick="showHint('p2', 7, 3)">Auflösung</button>
+                    </div>
+                    <div id="hint-display-p2-7" class="hint-display"></div>
+                </div>
+                <button type="submit" class="btn-validate">Beweisaufnahme beenden</button>
+            </form>
+            <div id="p2-feedback" class="feedback-msg"></div>
+        </div>
+
+        <div id="phase3">
+            <div class="form-info">
+                Ihr habt das Gefühl der Lösung nun wesentlich näher zu sein. Bisher wirkt jedoch noch jeder verdächtig. Hat hier denn wirklich jede Person ein Geheimnis?<br><br>
+                In dem Moment, als ihr euren Gedanken nachhängt, erhaltet ihr eine weitere Mail mit Informationen von Kommissar Henkel. Ob euch diese nun die Lösung des Falls bringen?<br><br>
+                <strong>(Ihr dürft nun Umschlag 3 öffnen)</strong>
+            </div>
+            
+            <form onsubmit="event.preventDefault(); validatePhase3();">
+                <label style="font-size: 1.3rem;">Wer hat den Stein gestohlen?</label>
+                <div class="choice-container">
+                    <label class="choice-item"><input type="radio" name="suspect" value="Badelt"> Klaus Badelt</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Gernot"> Peter Gernot</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Sernault"> Catherine Sernault</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Schiffer"> Lena Schiffer</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Ingram"> Dr. Elisabeth Ingram</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Ernest"> Dr. Viktor Ernest</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Muno"> Theodor Muno</label>
+                    <label class="choice-item"><input type="radio" name="suspect" value="Völker"> Sabrina Völker</label>
+                </div>
+                <button type="submit" class="btn-validate">Urteil fällen</button>
+            </form>
+            <div id="p3-feedback" class="feedback-msg suspect-response"></div>
+        </div>
+
+        <div id="victory-screen" class="victory-content">
+            <h2 style="color: var(--accent-success); text-transform: uppercase;">Fall Gelöst!</h2>
+            
+            <img src="Corvo.png" alt="Das wahre Gesicht von Catherine" class="victory-img">
+            
+            <div class="story-text">
+                <p><strong>Das ist richtig!</strong></p>
+                <p>Noch während du Catherine beschuldigst, verändert sich ihr gesamtes Auftreten. Nichts ist mehr von der zurückhaltenden Assistentin übrig. Spöttisch blickt sie euch in die Augen und lächelt.</p>
+                <p>"Glückwunsch, dabei dachte ich, alle Spuren verwischt zu haben. Die närrische Museumsleitung und die anderen im Haus hatten nie auch nur den Hauch einer Ahnung von meiner wahren Identität. Nur ihr seid mir auf die Schliche gekommen. Nun gut, dann lasse ich mich natürlich von diesem exzellenten Kommissar Henkel gerne verhaften."</p>
+                <p>Euch überkommt eine ungute Ahnung, als ihr zum Telefon greift und euren Cousin anruft. Felix Joachim ist sofort Feuer und Flamme: "Ich wusste es, mit der Unterstützung eines Felix Joachim Henkel, kannst selbst du einen Fall dieses Kalibers lösen, ich mache mich sofort auf den Weg."</p>
+                <p>Wenige Minuten später trifft er bereits im Museum ein und nimmt Catherine Sernault in Gewahrsam. Als sie in den Streifenwagen steigt und euch zum Abschied zuzwinkert beschleicht euch das Gefühl, dass ihr euch nicht zum letzten Mal gesehen habt.</p>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <p>Ermittlungspunkte (Zeitbonus):</p>
+                <div class="score-big" id="final-score">0</div>
+                <div class="penalty-text" id="final-penalties"></div>
+            </div>
+
+            <div class="highscore-section" id="highscore-entry-form">
+                <h3>Tragt euer Team in die Tages-Akte ein:</h3>
+                <input type="text" id="team-name" placeholder="Teamname eingeben..." style="max-width: 300px; margin-bottom: 10px;">
+                <button onclick="saveHighscore()" class="btn-validate" style="padding: 10px; max-width: 300px; font-size: 1rem;">Speichern</button>
+            </div>
+
+            <div class="highscore-section" id="leaderboard-display" style="display:none;">
+                <h3 style="margin-top: 0;">Die besten Ermittler von heute</h3>
+                <table class="highscore-table">
+                    <thead><tr><th>Rang</th><th>Team</th><th>Punkte</th></tr></thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const TIME_PER_PHASE = 45 * 60;
+    let timeLeft = TIME_PER_PHASE;
+    let timerId;
+    let scores = [0, 0, 0];
+    let penaltyPoints = 0; 
+    let currentTotalScore = 0;
+
+    const suspectResponses = {
+        "Ingram": "<strong>Dr. Elisabeth Ingram:</strong><br>„Sind Sie von allen guten Geistern verlassen? Ich habe die Tat nicht begangen, Sie Narr. Ich habe mich mit einem guten Freund getroffen. Sein Name? Finden Sie das selbst heraus!“",
+        "Badelt": "<strong>Klaus Badelt:</strong><br>„Als würde ich den Stein stehlen! Für wie dilettantisch halten Sie mich? Ich habe zu dem Zeitpunkt meine Wäsche gewaschen.“",
+        "Völker": "<strong>Sabrina Völker:</strong><br>„Aber nein, ich bin es nicht gewesen. Wo ich denn dann war? Tja, das ist mir unangenehm darüber zu sprechen... ermitteln Sie doch weiter.....“",
+        "Muno": "<strong>Theodor Muno:</strong><br>„Nein.“",
+        "Ernest": "<strong>Dr. Viktor Ernest:</strong><br>„Eine bodenlose Frechheit mir, einer grandiosen Koryphäe, eine solche Tat zu unterstellen! Als würden mir Fehler unterlaufen! Davon kann Ihnen sicherlich auch meine Ex-Frau berichten!“",
+        "Schiffer": "<strong>Lena Schiffer:</strong><br>„Ich bitte Sie. Wie hätte ich von der illustren Abendgesellschaft so schnell in Wesel sein können! Es war doch sogar ein Fotograf anwesend.“",
+        "Gernot": "<strong>Peter Gernot:</strong><br>„Ne du, ich war das nicht. Da musst du weitersuchen. Frag doch mal den Günni, der kann bestätigen, dass ich das nicht war.“"
+    };
+
+    const hints = {
+        p1: [
+            { t1: "Ihr könnt Dr. Ingram in der Cafeteria treffen.", t2: "Sie war nicht zu Hause, sondern auswärts.", sol: "Restaurant / Golfclub" },
+            { t1: "Peter Gernot befindet sich ganz unten im Geopark.", t2: "Er hat kein gutes Alibi.", sol: "Fernsehen / TV" },
+            { t1: "Klaus Badelt befindet sich im Obergeschoss bei den Biographien.", t2: "Er spielt gerne im Casino.", sol: "Casino Chips / Flyer" },
+            { t1: "Lena Schiffer steht im Obergeschoss in der Nähe der Laterne.", t2: "Ein älteres Familienmitglied", sol: "Großmutter / Oma" },
+            { t1: "Catherine Sernault ist im Erdgeschoss beim Buchdruck.", t2: "Das Gebäude heißt Luminor.", sol: "Kino (Luminor)" },
+            { t1: "Sabrina Völker befindet sich im Geopark beim Bohrspiel", t2: "Rote Blumen.", sol: "Sommerrosen / Klatschmohn" },
+            { t1: "Dr. Ernest steht mittig im Erdgeschoss", t2: "Ein Bereich für Angestellte.", sol: "Museum / Verwaltung" },
+            { t1: "Muno befindet sich im Erdgeschoss weit hinten neben dem Sargdeckel", t2: "Dort wird klassisch gesungen.", sol: "Oper" }
+        ],
+        p2: [
+            { t1: "Dr. Ernest trägt ein sehr markantes Sakko. Schaut euch im Foyer einmal genauer um..", t2: "Auf der Aufnahme der Überwachsungskamera scheint jemand genau dieses Sakko zu tragen. Die Person versteckt etwas in einem Koffer. Das Zitat findet ihr auf einem Portrait von Blücher ganz in der Nähe des Bilderrahmens. ", sol: "Peter Gernot erpresst Dr. Ernest, da er ein Bild von Ernest fälschlicherweise als echt deklariert hat." },
+            { t1: "Prüft die Hinweise im Umschlag. Besonders den Brief von Klaus Badelt.", t2: "Schaut euch an Munos Arbeitsplatz um. Welche Zeichnung an der Wand passt nicht ins Bild? Schaut dort einmal genauer hin", sol: "Muno fälscht Exponate und verkauft diese. Möchte aber aufhören, da seine Tochter ein Enkelkind erwartet. Badelt will ihn davon abhalten, der er ebenfalls davon profitiert." },
+            { t1: "Dr. Ingram hat ein extravagantes Büro. Sie würde den Schlüssel doch nicht profan unter einem Stein verstecken? ", t2: "Das Schloss an der Kiste benötigt keine Zahlen, sondern Richtungen. Schaut einmal unter dem Tisch nach und leuchtet mit der Taschenlampe. Vielleicht haben die Städtenamen in Relation zu Wesel eine Bedeutung?", sol: "Gebt die Himmelsrichtungen NNSOWSOW ein. Dort findet ihr den Grund für Ingrams Geldprobleme. " },
+            { t1: "Das Geld wurde anderweitig verwendet.", t2: "Prüft den Inhalt des Umschlags genauer, der Budgetplan wurde zu Ungunsten Völkers angepasst.", sol: "Zweckentfremdet / Für 'Glanz und Gloria' genutzt" },
+            { t1: "Prüft die Handschrift auf dem kleinen Zettel und dem Brief an Gumpert. Sie ähneln sich sehr.", t2: "Klaus Badelt hat viele Bücher. Vielleicht klopft ihr einmal an alle? Zwei scheinen nicht echt zu sein.", sol: "Dr. Ingram ist Löwe wie ihre Handschrift verrät. Klaus Badelt hat nachforschen lassen über die von Adlersteins und ist somit Adler." },
+            { t1: "Lena Schiffers Computer könnte die Lösung sein", t2: "St. Martin ist der Hinweis. Habt ihr in der Nähe von Lena Schiffer eventuell ein Element bemerkt, dass neben der Laterne steht und Morsecode hat?", sol: "Hört euch die Audiospur einmal genau an. Die Töne ergeben die Lösung Roswita. Nun wisst ihr, dass Völker Ingram erpresst um ein gutes Arbeitszeugnis und eine Festanstellung zu erhalten." },
+            { t1: "Schaut euch einmal die Seite im Umschlag zum PC von Peter Gernot genauer an.", t2: "Das Passwort ist das Geburtsjahr seines Lieblingsmalers. Der Titel ist Sternennacht (Starry Night)", sol: "Es handelt sich um van Gogh. Der Suchverlauf zeigt klar, dass Gernot mit seiner Exfrau auf eine Reise gehen möchte. Achtet auch genau auf die Zeiten der Suche." },
+            { t1: "Vielleicht hilft euch das Familienfoto?", t2: "Wie könnte Catherine Sernaults Name vor ihrer Namensänderung gewesen sein?", sol: "Kathrin und Sabrina sind Catherine Sernault und Sabrina Völker. Der Name taucht auch auf einer Liste des Stadtarchivs Wesel auf." }
+        ]
+    };
+
+    function showHint(phase, qIndex, type) {
+        const displayEl = document.getElementById(`hint-display-${phase}-${qIndex}`);
+        const hintData = hints[phase][qIndex];
+        let text = "";
+        
+        if (type === 1) text = "<strong>Tipp 1:</strong> " + hintData.t1;
+        else if (type === 2) text = "<strong>Tipp 2:</strong> " + hintData.t2;
+        else if (type === 3) text = "<strong>Auflösung:</strong> " + hintData.sol;
+        
+        displayEl.innerHTML = text;
+        displayEl.style.display = "block";
+    }
+
+    function startTimer() {
+        clearInterval(timerId);
+        timerId = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) { clearInterval(timerId); alert("Zeit abgelaufen!"); }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function resetSystem() {
+        if(confirm("Soll der Fall wirklich neu gestartet werden? Alle Ermittlungserfolge und Fortschritte gehen verloren!")) {
+            clearInterval(timerId);
+            scores = [0, 0, 0];
+            penaltyPoints = 0;
+            
+            document.querySelectorAll('input[type="text"]').forEach(el => { el.value = ''; el.className = ''; });
+            document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+            document.querySelectorAll('.feedback-msg, .hint-display').forEach(el => el.style.display = 'none');
+            
+            document.getElementById('phase1').style.display = 'block';
+            document.getElementById('phase2').style.display = 'none';
+            document.getElementById('phase3').style.display = 'none';
+            document.getElementById('victory-screen').style.display = 'none';
+            document.getElementById('timer-display').style.display = 'block';
+            document.getElementById('phase-title').innerText = "Phase 1: Alibi-Check";
+            
+            document.getElementById('highscore-entry-form').style.display = 'block';
+            document.getElementById('leaderboard-display').style.display = 'none';
+
+            timeLeft = TIME_PER_PHASE;
+            updateTimerDisplay();
+            startTimer();
+            window.scrollTo(0,0);
+        }
+    }
+
+    function checkAnswer(val, conditionGroups) {
+        return conditionGroups.every(group => group.some(keyword => val.includes(keyword)));
+    }
+
+    function validatePhase1() {
+        const firstAnswer = document.getElementById('ans1').value.toLowerCase().trim();
+        
+        if (firstAnswer === "bananarama") {
+            scores[0] = TIME_PER_PHASE;
+            document.getElementById('phase1').style.display = 'none';
+            document.getElementById('phase2').style.display = 'block';
+            document.getElementById('phase-title').innerText = "Phase 2: Konfrontation";
+            timeLeft = TIME_PER_PHASE;
+            startTimer();
+            window.scrollTo(0,0);
+            return;
+        }
+
+        const checks = [
+            { id: 'ans1', groups: [['restaurant', 'gegessen', 'golfclub', 'st.Aurelius', 'separee']] },
+            { id: 'ans2', groups: [['fernsehen', 'fernseher', 'tv', 'zuhause']] },
+            { id: 'ans3', groups: [['flyer', 'chips', 'casino', 'royal-mirage']] },
+            { id: 'ans4', groups: [['großmutter', 'oma', 'roswita']] },
+            { id: 'ans5', groups: [['luminor', 'kino']] },
+            { id: 'ans6', groups: [['sommerrosen', 'klatschmohn']] },
+            { id: 'ans7', groups: [['museum', 'verwaltung']] },
+            { id: 'ans8', groups: [['oper']] }
+        ];
+        
+        let correct = 0;
+        checks.forEach(c => {
+            const field = document.getElementById(c.id);
+            const val = field.value.toLowerCase();
+            if (checkAnswer(val, c.groups)) {
+                correct++;
+                field.className = "correct-field";
+            } else {
+                field.className = "error-field";
+            }
+        });
+
+        const feedbackEl = document.getElementById('p1-feedback');
+        feedbackEl.style.display = 'block';
+
+        if (correct >= 8) {
+            scores[0] = timeLeft;
+            feedbackEl.style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+            feedbackEl.style.color = 'var(--accent-success)';
+            feedbackEl.innerText = "Alle Alibis verifiziert! Lade Phase 2...";
+            
+            setTimeout(() => {
+                document.getElementById('phase1').style.display = 'none';
+                document.getElementById('phase2').style.display = 'block';
+                document.getElementById('phase-title').innerText = "Phase 2: Konfrontation";
+                timeLeft = TIME_PER_PHASE;
+                startTimer();
+                window.scrollTo(0,0);
+            }, 1500);
+        } else {
+            penaltyPoints += 10;
+            feedbackEl.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+            feedbackEl.style.color = 'var(--accent-error)';
+            feedbackEl.innerText = `Datenkonflikt: ${correct} von 8 Alibis sind plausibel. Bitte überprüfen Sie die rot markierten Felder.`;
+        }
+    }
+
+    function validatePhase2() {
+        const firstAnswer = document.getElementById('p2_ans1').value.toLowerCase().trim();
+        
+        if (firstAnswer === "bananarama") {
+            scores[1] = TIME_PER_PHASE;
+            document.getElementById('phase2').style.display = 'none';
+            document.getElementById('phase3').style.display = 'block';
+            document.getElementById('phase-title').innerText = "Phase 3: Das Urteil";
+            timeLeft = TIME_PER_PHASE;
+            startTimer();
+            window.scrollTo(0,0);
+            return;
+        }
+
+        const checks = [
+            { id: 'p2_ans1', groups: [['peter', 'gernot']] },
+            { id: 'p2_ans2', groups: [['fälsch', 'verkauf', 'exponat']] },
+            { id: 'p2_ans3', groups: [['geld', 'schulden', 'verhältnisse']] },
+            { id: 'p2_ans4', groups: [['glanz', 'gloria', 'umgenutzt', 'zweckentfremdet', 'umgewidmet', 'sonderausstellung', 'umverteilt']] },
+            { id: 'p2_ans5', groups: [['ingram'], ['badelt']] },
+            { id: 'p2_ans6', groups: [['lena', 'schiffer']] },
+            { id: 'p2_ans7', groups: [['peter', 'gernot']] },
+            { id: 'p2_ans8', groups: [['sernault'], ['völker']] }
+        ];
+        
+        let correct = 0;
+        checks.forEach(c => {
+            const field = document.getElementById(c.id);
+            const val = field.value.toLowerCase();
+            if (checkAnswer(val, c.groups)) {
+                correct++;
+                field.className = "correct-field";
+            } else {
+                field.className = "error-field";
+            }
+        });
+
+        const feedbackEl = document.getElementById('p2-feedback');
+        feedbackEl.style.display = 'block';
+
+        if (correct >= 8) {
+            scores[1] = timeLeft;
+            feedbackEl.style.backgroundColor = 'rgba(34, 197, 94, 0.2)';
+            feedbackEl.style.color = 'var(--accent-success)';
+            feedbackEl.innerText = "Alle Widersprüche aufgedeckt! Bereite Finalakten vor...";
+            
+            setTimeout(() => {
+                document.getElementById('phase2').style.display = 'none';
+                document.getElementById('phase3').style.display = 'block';
+                document.getElementById('phase-title').innerText = "Phase 3: Das Urteil";
+                timeLeft = TIME_PER_PHASE;
+                startTimer();
+                window.scrollTo(0,0);
+            }, 1500);
+        } else {
+            penaltyPoints += 10;
+            feedbackEl.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+            feedbackEl.style.color = 'var(--accent-error)';
+            feedbackEl.innerText = `Ermittlung unvollständig: ${correct} von 8 Aussagen sind verifiziert. Überprüfen Sie die roten Profile.`;
+        }
+    }
+
+    function validatePhase3() {
+        const selected = document.querySelector('input[name="suspect"]:checked');
+        const feedbackEl = document.getElementById('p3-feedback');
+
+        if (!selected) { 
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+            feedbackEl.style.color = 'var(--accent-error)';
+            feedbackEl.innerHTML = "Wählen Sie eine Person aus, um das Urteil zu fällen!";
+            return; 
+        }
+
+        if (selected.value === "Sernault") {
+            scores[2] = timeLeft;
+            clearInterval(timerId);
+            showVictory();
+        } else {
+            penaltyPoints += 10;
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            feedbackEl.style.color = 'var(--text-primary)';
+            feedbackEl.innerHTML = suspectResponses[selected.value];
+        }
+    }
+
+    function showVictory() {
+        document.getElementById('phase3').style.display = 'none';
+        document.getElementById('timer-display').style.display = 'none';
+        document.getElementById('victory-screen').style.display = 'block';
+        document.getElementById('phase-title').innerText = "ABGESCHLOSSEN";
+        
+        let calculatedScore = Math.floor((scores[0] + scores[1] + scores[2]) / 3);
+        calculatedScore -= penaltyPoints;
+        
+        currentTotalScore = Math.max(0, calculatedScore);
+        document.getElementById('final-score').innerText = currentTotalScore;
+        
+        if(penaltyPoints > 0) {
+            document.getElementById('final-penalties').innerText = `(${penaltyPoints} Strafpunkte abgezogen)`;
+        } else {
+            document.getElementById('final-penalties').innerText = "(Fehlerfreie Ermittlung!)";
+            document.getElementById('final-penalties').style.color = "var(--accent-success)";
+        }
+
+        window.scrollTo(0,0);
+    }
+
+    function saveHighscore() {
+        const teamInput = document.getElementById('team-name').value.trim();
+        const teamName = teamInput !== "" ? teamInput : "Unbekannte Ermittler";
+        const today = new Date().toLocaleDateString();
+        
+        let highscores = JSON.parse(localStorage.getItem('museumHighscores')) || [];
+        
+        highscores = highscores.filter(entry => entry.date === today);
+        highscores.push({ name: teamName, score: currentTotalScore, date: today });
+        highscores.sort((a, b) => b.score - a.score);
+        highscores = highscores.slice(0, 10);
+        
+        localStorage.setItem('museumHighscores', JSON.stringify(highscores));
+        
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '';
+        highscores.forEach((hs, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>#${index + 1}</td><td>${hs.name}</td><td>${hs.score}</td>`;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('highscore-entry-form').style.display = 'none';
+        document.getElementById('leaderboard-display').style.display = 'block';
+    }
+
+    startTimer();
+</script>
+</body>
+</html>
