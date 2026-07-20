@@ -116,6 +116,12 @@
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
+
         input[type="text"].correct-field {
             border-color: var(--accent-success) !important;
             box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
@@ -176,6 +182,10 @@
             margin-top: 20px;
         }
 
+        .btn-validate:hover {
+            background-color: #2563eb;
+        }
+
         #phase2, #phase3, #victory-screen { display: none; }
 
         .victory-content { text-align: center; }
@@ -225,7 +235,7 @@
 
         .highscore-table th { color: var(--accent-blue); }
 
-        /* Neue Hint Styles */
+        /* Hint Styles */
         .hint-controls {
             margin-top: 8px;
             display: flex;
@@ -384,7 +394,7 @@
         </div>
 
         <div id="phase2">
-            <div class="form-info"><strong>PHASE 2 FREIGESCHALTET.</strong> Nachdem ihr euch mit den Aussagen der Verdächtigen und den ersten Indizien beschäftigt habt, sind euch einige Ungereimtheiten aufgefallen. Zeit für eine Konfrontation!</div>
+            <div class="form-info"><strong>PHASE 2 FREIGESCHALTET.</strong> Nachdem ihr euch mit den Aussagen der Verdächtigen und den ersten Indizien beschäftigt habt, sind euch einige Ungereimtheiten aufgefallen. Prüft diese genauer!</div>
             <form onsubmit="event.preventDefault(); validatePhase2();">
                 <div class="question-row">
                     <label>01. Wer erpresst Viktor Ernest?</label>
@@ -502,10 +512,10 @@
             
             <div class="story-text">
                 <p><strong>Das ist richtig!</strong></p>
-                <p>Noch während du Catherine beschuldigst, verändert sich ihr gesamtes Auftreten. Nichts ist mehr von der zurückhaltenden Assistentin übrig. Spöttisch blickt sie euch in die Augen und ein kaltes Lächeln erscheint auf ihren Lippen.</p>
-                <p>"Glückwunsch, dabei dachte ich, alle Spuren verwischt zu haben. Die närrische Museumsleitung und die anderen im Haus hatten nie auch nur den Hauch einer Ahnung von meiner wahren Identität. Nun ja, alle außer einer..."</p>
-                <p>Euch überkommt eine ungute Ahnung, als ihr zum Telefon greift und euren Cousin anruft. Felix Joachim ist sofort Feuer und Flamme: "Ich wusste es, mit der Unterstützung eines Freundes konnte ich endlich die echten Verantwortlichen finden!"</p>
-                <p>Wenige Minuten später trifft er bereits im Museum ein und nimmt Catherine Sernault in Gewahrsam. Als sie in den Streifenwagen steigt und euch zum Abschied zuzwinkert beschleicht euch das Gefühl, dass dies hier noch nicht das Ende der Geschichte ist.</p>
+                <p>Noch während du Catherine beschuldigst, verändert sich ihr gesamtes Auftreten. Nichts ist mehr von der zurückhaltenden Assistentin übrig. Spöttisch blickt sie euch in die Augen.</p>
+                <p>"Glückwunsch, dabei dachte ich, alle Spuren verwischt zu haben. Die närrische Museumsleitung und die anderen im Haus hatten nie auch nur den Hauch einer Ahnung von meiner wahren Identität."</p>
+                <p>Euch überkommt eine ungute Ahnung, als ihr zum Telefon greift und euren Cousin anruft. Felix Joachim ist sofort Feuer und Flamme: "Ich wusste es, mit der Unterstützung eines Freundes werde ich sie verhaften."</p>
+                <p>Wenige Minuten später trifft er bereits im Museum ein und nimmt Catherine Sernault in Gewahrsam. Als sie in den Streifenwagen steigt und euch zum Abschied zuzwinkert beschleicht euch ein mulmiges Gefühl.</p>
             </div>
             
             <div style="margin-top: 30px;">
@@ -545,7 +555,7 @@
         "Badelt": "<strong>Klaus Badelt:</strong><br>\"Als würde ich den Stein stehlen! Für wie dilettantisch halten Sie mich? Ich habe zu dem Zeitpunkt meine Wäsche gewaschen.\"",
         "Völker": "<strong>Sabrina Völker:</strong><br>\"Aber nein, ich bin es nicht gewesen. Wo ich denn dann war? Tja, das ist mir unangenehm darüber zu sprechen... ermitteln Sie doch weiter...\"",
         "Muno": "<strong>Theodor Muno:</strong><br>\"Nein.\"",
-        "Ernest": "<strong>Dr. Viktor Ernest:</strong><br>\"Eine bodenlose Frechheit mir, einer grandiosen Koryphäe, eine solche Tat zu unterstellen! Als würden mir Fehler unterlaufen! Davon kann keine Rede sein.\"",
+        "Ernest": "<strong>Dr. Viktor Ernest:</strong><br>\"Eine bodenlose Frechheit mir, einer grandiosen Koryphäe, eine solche Tat zu unterstellen! Als würden mir Fehler unterlaufen! Davon kann keine Rede sein!\"",
         "Schiffer": "<strong>Lena Schiffer:</strong><br>\"Ich bitte Sie. Wie hätte ich von der illustren Abendgesellschaft so schnell in Wesel sein können! Es war doch sogar ein Fotograf anwesend.\"",
         "Gernot": "<strong>Peter Gernot:</strong><br>\"Ne du, ich war das nicht. Da musst du weitersuchen. Frag doch mal den Günni, der kann bestätigen, dass ich das nicht war.\""
     };
@@ -563,12 +573,12 @@
         ],
         p2: [
             { t1: "Dr. Ernest trägt ein sehr markantes Sakko. Schaut euch im Foyer einmal genauer um.", t2: "Auf der Aufnahme der Überwachungskamera scheint jemand genau dieses Sakko zu tragen.", sol: "Peter Gernot" },
-            { t1: "Prüft die Hinweise im Umschlag. Besonders den Brief von Klaus Badelt.", t2: "Schaut euch an Munos Arbeitsplatz um. Welche Zeichnung an der Wand passt nicht ins Bild? Schaut dort ein paar Mal hin.", sol: "Kunstfälschung" },
-            { t1: "Dr. Ingram hat ein extravagantes Büro. Sie würde den Schlüssel doch nicht profan unter einem Stein verstecken?", t2: "Das Schloss an der Kiste benötigt keine Zahlen, sondern Richtungen.", sol: "Richtungswechsel / Nordwest" },
+            { t1: "Prüft die Hinweise im Umschlag. Besonders den Brief von Klaus Badelt.", t2: "Schaut euch an Munos Arbeitsplatz um. Welche Zeichnung an der Wand passt nicht ins Bild? Schaut dort einmal genauer hin.", sol: "Fälschung / Kunstverkauf" },
+            { t1: "Dr. Ingram hat ein extravagantes Büro. Sie würde den Schlüssel doch nicht profan unter einem Stein verstecken?", t2: "Das Schloss an der Kiste benötigt keine Zahlen, sondern Richtungen.", sol: "Spielsucht / Geldschulden" },
             { t1: "Das Geld wurde anderweitig verwendet.", t2: "Prüft den Inhalt des Umschlags genauer, der Budgetplan wurde zu Ungunsten Völkers angepasst.", sol: "Zweckentfremdet / Für 'Glanz und Gloria'" },
-            { t1: "Prüft die Handschrift auf dem kleinen Zettel und dem Brief an Gumpert. Sie ähneln sich sehr.", t2: "Klaus Badelt hat viele Bücher. Vielleicht klopft ihr einmal an alle? Zwei scheinen leicht zu sein.", sol: "Ingram und Badelt" },
+            { t1: "Prüft die Handschrift auf dem kleinen Zettel und dem Brief an Gumpert. Sie ähneln sich sehr.", t2: "Klaus Badelt hat viele Bücher. Vielleicht klopft ihr einmal an alle? Zwei scheinen besonders verdächtig.", sol: "Ingram und Badelt" },
             { t1: "Lena Schiffers Computer könnte die Lösung sein", t2: "St. Martin ist der Hinweis. Habt ihr in der Nähe von Lena Schiffer eventuell ein Element bemerkt, dass neben der Laterne steht?", sol: "Lena Schiffer" },
-            { t1: "Schaut euch einmal die Seite im Umschlag zum PC von Peter Gernot genauer an.", t2: "Das Passwort ist das Geburtsjahr seines Lieblingsmalers. Der Titel ist Sternennacht (Starry Night).", sol: "1853 (Van Gogh)" },
+            { t1: "Schaut euch einmal die Seite im Umschlag zum PC von Peter Gernot genauer an.", t2: "Das Passwort ist das Geburtsjahr seines Lieblingsmalers. Der Titel ist Sternennacht (Starry Night).", sol: "Peter Gernot" },
             { t1: "Vielleicht hilft euch das Familienfoto?", t2: "Wie könnte Catherine Sernaults Name vor ihrer Namensänderung gewesen sein?", sol: "Kathrin und Sabrina sind Catherine Sernault und Sabrina Völker" }
         ]
     };
@@ -591,7 +601,11 @@
         timerId = setInterval(() => {
             timeLeft--;
             updateTimerDisplay();
-            if (timeLeft <= 0) { clearInterval(timerId); alert("Zeit abgelaufen!"); }
+            if (timeLeft <= 0) { 
+                clearInterval(timerId); 
+                alert("Zeit abgelaufen!"); 
+                resetSystem();
+            }
         }, 1000);
     }
 
@@ -829,7 +843,17 @@
         document.getElementById('leaderboard-display').style.display = 'block';
     }
 
-    startTimer();
+    // Timer wird gestartet, sobald die Seite geladen ist
+    document.addEventListener('DOMContentLoaded', function() {
+        startTimer();
+    });
+    
+    // Fallback für den Fall, dass DOMContentLoaded bereits ausgelöst wurde
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startTimer);
+    } else {
+        startTimer();
+    }
 </script>
 </body>
 </html>
